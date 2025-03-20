@@ -7,9 +7,7 @@ import { useRouter } from "next/navigation";
 export default function UserAccount() {
   const [userData, setUserData] = useState(null);
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
   const { session, setSession } = useContext(HandleAccountContext);
-
   const [addMoney, setAddMoney] = useState(0);
 
   async function depositMoney() {
@@ -21,18 +19,15 @@ export default function UserAccount() {
     if (response.ok) {
       const data = await response.json();
       userData.amount = data.amount;
-      console.log("deposit successful, here's data:", data); // Log backend response
     } else {
       const error = await response.json();
-      console.error("Error during deposit:", error); // Log error
+
       alert(error.message);
     }
     setAddMoney(0);
   }
 
   useEffect(() => {
-    console.log("Session data being sent to backend:", session); // Log session data
-
     async function verifyLogin() {
       const response = await fetch("http://localhost:4000/verifyLogin", {
         method: "POST",
@@ -42,16 +37,12 @@ export default function UserAccount() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Fetch successful, here's data:", data); // Log backend response
         setUserData(data);
       } else {
         const error = await response.json();
-        console.error("Error during verification:", error); // Log error
         alert(error.message);
         router.push("/loginPage");
       }
-
-      setIsLoading(false);
     }
 
     verifyLogin();
@@ -60,10 +51,6 @@ export default function UserAccount() {
   useEffect(() => {
     console.log("userData", userData);
   }, [userData]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   async function logOut() {
     await fetch("http://localhost:4000/logOut", {
@@ -78,20 +65,27 @@ export default function UserAccount() {
 
   return (
     <div className="flex flex-col min-h-screen items-center p-10">
-      <h1>Account</h1>
       {userData && (
-        <div className="flex flex-col">
-          <p>Welcome, {userData.username}</p>
-          <p>Account Balance: {userData.amount}</p>
-          <div>
+        <div className="flex flex-col bg-blue-300 p-10 gap-10 text-blue-950 font-bold rounded-lg ">
+          <h1 className="text-7xl">Welcome, {userData.username}!</h1>
+          <p className="text-2xl">Account Balance: {userData.amount}$</p>
+          <div className="flex bg-blue-500 rounded-lg justify-between">
             <input
               type="number"
+              className="text-2xl p-5"
               placeholder="Choose amount"
               onChange={(e) => setAddMoney(e.target.value)}
             />
-            <button onClick={depositMoney}>deposit money</button>
+            <button
+              onClick={depositMoney}
+              className="text-2xl hover:cursor-pointer bg-blue-800 text-blue-100 p-5 rounded-r-lg"
+            >
+              deposit money
+            </button>
           </div>
-          <button onClick={logOut}>Log outs</button>
+          <button onClick={logOut} className="hover:cursor-pointer text-2xl">
+            Log out
+          </button>
         </div>
       )}
     </div>
